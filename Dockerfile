@@ -1,31 +1,34 @@
-# Use an official lightweight Python image
+# ===============================
+# ✅ DOCVIBE AI SUMMARIZER - Render Deploy
+# ===============================
 FROM python:3.12-slim
 
-# Install system packages including tesseract and build tools
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      tesseract-ocr \
-      libtesseract-dev \
-      poppler-utils \
-      build-essential \
-      git \
-      && rm -rf /var/lib/apt/lists/*
+# --- Install system dependencies (Tesseract OCR + utils) ---
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    libtesseract-dev \
+    poppler-utils \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set working dir
+# --- Set working directory ---
 WORKDIR /app
 
-# Copy requirements and install Python deps
+# --- Copy requirements file and install dependencies ---
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app files
+# Upgrade pip and install PyTorch from official CPU index first, then others
+RUN pip install --upgrade pip \
+ && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu \
+ && pip install --no-cache-dir -r requirements.txt
+
+# --- Copy app files ---
 COPY . .
 
-# Expose the port Render will use
-ENV PORT 10000
+# --- Expose Render port ---
+ENV PORT=10000
 EXPOSE ${PORT}
 
-# Use gunicorn to serve app in production
-# 'app:app' expects app.py with Flask app named 'app'
+# --- Run app with gunicorn (for production) ---
 CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:app
