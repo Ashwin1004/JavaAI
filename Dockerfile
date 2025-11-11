@@ -1,24 +1,20 @@
 # ===============================
-# ✅ DOCVIBE AI SUMMARIZER - Render Deploy (Final Stable)
+# ✅ DOCVIBE AI SUMMARIZER - Render Deploy (Optimized)
 # ===============================
-FROM python:3.12-slim
+FROM python:3.10-slim
 
-# --- Install required system packages ---
+# --- Install system dependencies ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
-    libtesseract-dev \
     poppler-utils \
-    build-essential \
     libjpeg-dev \
     zlib1g-dev \
-    cmake \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
 # --- Set working directory ---
 WORKDIR /app
 
-# --- Copy dependency list first (for Docker caching) ---
+# --- Copy dependency list ---
 COPY requirements.txt .
 
 # --- Install dependencies ---
@@ -29,12 +25,8 @@ RUN pip install --upgrade pip \
 # --- Copy project files ---
 COPY . .
 
-# --- Set environment variables ---
-ENV PORT=10000
-EXPOSE ${PORT}
-
-# --- Preload summarization model (optional) ---
-RUN python -c "from transformers import pipeline; pipeline('summarization', model='sshleifer/distilbart-cnn-12-6')"
+# --- Expose Render port ---
+EXPOSE 10000
 
 # --- Start Flask app with Gunicorn ---
 CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:app
