@@ -8,5 +8,5 @@ transformers==4.44.0
 python-pptx==0.6.21
 python-docx==0.8.11
 pyngrok==5.2.1
-torch==2.2.2+cpu   # CPU-only - adjust if you run GPU
+torch==2.1.0
 sentencepiece==0.1.99
