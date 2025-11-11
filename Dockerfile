@@ -1,42 +1,40 @@
 # ===============================
-# ✅ DOCVIBE AI SUMMARIZER - Render Deploy
+# ✅ DOCVIBE AI SUMMARIZER - Render Deploy (Final Stable)
 # ===============================
 FROM python:3.12-slim
 
-# --- Install system dependencies (Tesseract OCR + Build tools + PDF libs) ---
+# --- Install required system packages ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     libtesseract-dev \
     poppler-utils \
     build-essential \
-    cmake \
-    pkg-config \
     libjpeg-dev \
     zlib1g-dev \
-    libmupdf-dev \
+    cmake \
     git \
     && rm -rf /var/lib/apt/lists/*
 
 # --- Set working directory ---
 WORKDIR /app
 
-# --- Copy requirements file and install dependencies ---
+# --- Copy dependency list first (for Docker caching) ---
 COPY requirements.txt .
 
-# Upgrade pip, install PyTorch CPU, then the rest
+# --- Install dependencies ---
 RUN pip install --upgrade pip \
  && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir -r requirements.txt
 
-# --- Copy app files ---
+# --- Copy project files ---
 COPY . .
 
-# --- Expose Render port ---
+# --- Set environment variables ---
 ENV PORT=10000
 EXPOSE ${PORT}
 
-# --- Pre-download summarizer model (optional but speeds up startup) ---
+# --- Preload summarization model (optional) ---
 RUN python -c "from transformers import pipeline; pipeline('summarization', model='sshleifer/distilbart-cnn-12-6')"
 
-# --- Start app with Gunicorn (production server) ---
+# --- Start Flask app with Gunicorn ---
 CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:app
