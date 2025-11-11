@@ -1,0 +1,12 @@
+flask==2.3.3
+flask-cors==3.0.10
+gunicorn==21.2.0
+PyMuPDF==1.22.5
+pytesseract==0.3.10
+Pillow==10.0.0
+transformers==4.44.0
+python-pptx==0.6.21
+python-docx==0.8.11
+pyngrok==5.2.1
+torch==2.2.2+cpu   # CPU-only - adjust if you run GPU
+sentencepiece==0.1.99
