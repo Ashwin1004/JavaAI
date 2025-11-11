@@ -2,7 +2,8 @@ import os
 import io
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import PyMuPDF as fitz
+import fitz  # PyMuPDF
+
 import pytesseract
 from PIL import Image
 from transformers import pipeline
